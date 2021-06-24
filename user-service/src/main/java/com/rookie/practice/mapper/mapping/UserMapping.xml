@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.rookie.practice.mapper.IUserDao">
+
+    <resultMap id="baseResultMap" type="com.rookie.practice.entity.SysUserInfo">
+        <id column="id" property="id"/>
+        <result column="loginName" property="loginName"/>
+        <result column="roleId" property="roleId"/>
+        <result column="userGuid" property="userGuid"/>
+        <result column="username" property="username"/>
+    </resultMap>
+
+    <update id="updateUserById">
+        update spring_dev.sys_user_info user
+        set user.login_name=#{user.loginName},
+            user.username=#{user.username},
+            user.role_id=#{user.roleId},
+            user.user_guid=#{user.userGuid}
+        where user.id = #{user.id}
+    </update>
+    <update id="updateUserBatch">
+        update spring_dev.sys_user_info u
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="u.login_name=case" suffix="end,">
+                <foreach collection="userMap" item="value" index="key">
+                    <if test="key !=null">
+                        when u.user_guid=#{key} then
+                        u.login_name=#{value}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where u.user_guid in
+        <foreach collection="userMap.entrySet()" index="key" open="(" close=")" separator=",">
+            #{key}
+        </foreach>
+    </update>
+
+    <delete id="deleteUserById">
+        delete
+        from spring_dev.sys_user_info
+        where id = #{id}
+    </delete>
+    <select id="getUserById" resultMap="baseResultMap">
+        select login_name as loginName,
+               user_guid  as userGuid,
+               role_id    as roleId,
+               username   as username,
+               id         as id
+        from spring_dev.sys_user_info
+        where id = #{id};
+    </select>
+</mapper>
